@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant App</title>
+</head>
+<body>
+    <form>
+        <label for="price">Choose Price</label>
+        <input type="number" name="price" id="price">
+        <label for="dish">Choose Dish</label>
+        <input type="text" name="dish" id="dish">
+        <label for="table">Choose a Table</label>
+        <select id="table">
+            <option value="Table 1">Table 1</option>
+            <option value="Table 2">Table 2</option>
+            <option value="Table 3">Table 3</option>
+        </select>
+        <input type="button" class="btn" value="Add to bill" id="addBtn">
+    </form>
+
+    <ul id="list">
+        <h1>Orders</h1>
+        <ul id="table1">
+            <h2>Table1</h2>
+        </ul>
+        <ul id="table2">
+            <h2>Table2</h2>
+        </ul>
+        <ul id="table3">
+            <h2>Table3</h2>
+        </ul>
+    </ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script>
+        const btn = document.getElementById('addBtn');
+        let price = document.getElementById('price');
+        let dish = document.getElementById('dish');
+        let table = document.getElementById('table');
+        let table1 = document.getElementById('table1');
+        let table2 = document.getElementById('table2');
+        let table3 = document.getElementById('table3');
+        let list = document.getElementById('list');
+
+        btn.addEventListener('click', () => {
+            if (price.value === '' || dish.value === '' || table.value === '') {
+                alert('Please Enter the Details');
+            } else {
+                const li = document.createElement('li');
+                li.appendChild(document.createTextNode(
+                    `${price.value} : ${dish.value}`
+                ));
+
+                if (table.value === 'Table 1') {
+                    table1.appendChild(li);
+                } else if (table.value === 'Table 2') {
+                    table2.appendChild(li);
+                } else if (table.value === 'Table 3') {
+                    table3.appendChild(li);
+                }
+
+                const obj = {
+                    price : price.value,
+                    dish : dish.value,
+                    table : table.value
+                }
+
+                axios.post('https://crudcrud.com/api/92cbd0c6e015479f876a0b038ecee9fe/createorder' , obj).then((res)=>{
+                    console.log(res)
+                }).catch((err)=>{
+                    console.log(err)
+                })
+            }
+
+            price.value = '';
+            dish.value = '';
+            table.value = ''
+        });
+
+        window.addEventListener('DOMContentLoaded',()=>{
+            axios.get('https://crudcrud.com/api/92cbd0c6e015479f876a0b038ecee9fe/createorder').then((res)=>{
+                console.log(res)
+                const data  = res.data
+                for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                const li = document.createElement('li');
+                li.id = item._id;
+
+                li.appendChild(document.createTextNode(`${item.price} : ${item.dish}`));
+
+                if (item.table === 'Table 1') {
+                    table1.appendChild(li);
+                } else if (item.table === 'Table 2') {
+                    table2.appendChild(li);
+                } else if (item.table === 'Table 3') {
+                    table3.appendChild(li);
+                }
+
+                const del = document.createElement('input');
+                        del.type = 'button';
+                        del.value = 'Delete Order';
+
+                        del.addEventListener('click', () => {
+                            axios.delete(`https://crudcrud.com/api/92cbd0c6e015479f876a0b038ecee9fe/createorder/${item._id}`)
+                                .then((response) => {
+                                    console.log(response);
+                                    li.remove();
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+                        });
+
+                        li.appendChild(del);
+                        if (item.table === 'Table 1') {
+                            table1.appendChild(li);
+                        } else if (item.table === 'Table 2') {
+                            table2.appendChild(li);
+                        } else if (item.table === 'Table 3') {
+                            table3.appendChild(li);
+                        }
+                    }
+
+            }).catch((err)=>{
+                console.log(err)
+            })
+        })
+    </script>
+</body>
+</html>
